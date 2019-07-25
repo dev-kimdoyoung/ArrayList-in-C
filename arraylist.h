@@ -32,7 +32,7 @@ _Bool addElement(ArrayList* arraylist, const int p, student student);      // �
 _Bool removeElement(ArrayList* arraylist, const int p);       // 리스트의 위치 p에 있는 원소를 제거
 
 // 리스트 초기화
-ArrayList* clearList();       // 리스트의 모든 원소를 제거
+_Bool clearList(ArrayList* arraylist);       // 리스트의 모든 원소를 제거
 
 // 원소 개수
 int getListLength(ArrayList* arraylist);    // 리스트의 원소 개수
