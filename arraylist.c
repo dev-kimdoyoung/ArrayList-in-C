@@ -8,34 +8,8 @@
 
 int main(int argc, char** argv) {
     ArrayList *arraylist = NULL;
-    student s;
-    strcpy(s.name, "김도영");
-    s.age = 25;
-    strcpy(s.address, "경기도 안양시 만안구");
+    createList(DEFAULT_SIZE);
 
-    arraylist = createList(DEFAULT_SIZE);
-    printf("리스트 생성 성공\n");
-
-    for(int i = 0; i< 5; i++) {
-        addElement(arraylist, i, s);
-    }
-
-    printf("데이터를 중간에 삽입해보자................................");
-    strcpy(s.name, "ㅇㅇㅇ");
-    s.age = 1;
-    strcpy(s.address, "ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ");
-    addElement(arraylist, 2, s);
-    for(int i = 0; i< 6; i++) {
-        getElement(arraylist, i);
-    }
-    printf("중간에 있는 데이터를 제거해보자................................");
-    removeElement(arraylist, 3);
-    for(int i = 0; i< 5; i++) {
-        getElement(arraylist, i);
-    }
-
-    clearList(arraylist);
-    deleteList(arraylist);
     return 0;
 }
 
