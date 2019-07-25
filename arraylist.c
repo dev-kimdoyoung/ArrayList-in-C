@@ -10,17 +10,30 @@ int main(int argc, char** argv) {
     ArrayList *arraylist = NULL;
     student s;
     strcpy(s.name, "김도영");
-    printf("%s\n", s.name);
     s.age = 25;
     strcpy(s.address, "경기도 안양시 만안구");
 
     arraylist = createList(DEFAULT_SIZE);
     printf("리스트 생성 성공\n");
 
-    for(int i = 0; i< 6; i++) {
+    for(int i = 0; i< 5; i++) {
         addElement(arraylist, i, s);
+    }
+
+    printf("데이터를 중간에 삽입해보자................................");
+    strcpy(s.name, "ㅇㅇㅇ");
+    s.age = 1;
+    strcpy(s.address, "ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ");
+    addElement(arraylist, 2, s);
+    for(int i = 0; i< 6; i++) {
         getElement(arraylist, i);
     }
+    printf("중간에 있는 데이터를 제거해보자................................");
+    removeElement(arraylist, 3);
+    for(int i = 0; i< 5; i++) {
+        getElement(arraylist, i);
+    }
+
     clearList(arraylist);
     deleteList(arraylist);
     return 0;
@@ -44,11 +57,14 @@ ArrayList* createList(const int n) {
 
     // list에 대한 동적 메모리 할당
     arraylist->list = (student*)calloc(arraylist->maxcount, sizeof(student));
-
+    
     // 만약 메모리 할당 성공하면
     if(arraylist->list != NULL) {
         // 할당 받은 메모리 값을 0xFF로 초기화
         memset(arraylist->list, 0xFF, arraylist->maxcount * sizeof(ArrayList));
+        for(int i = 0; i < DEFAULT_SIZE; i++) {
+            arraylist->list[i].age = EOF;
+        }
     }
     // 메모리 할당 실패하면
     else {
@@ -105,19 +121,30 @@ _Bool addElement(ArrayList* arraylist, const int p, student student_data) {
         arraylist->list = (student*)realloc(arraylist->list, arraylist->maxcount * sizeof(student));
         printf("메모리 재할당 완료\n");
     }
+    
+  // 해당 위치에 이미 데이터가 존재하면
+    if(arraylist->list[p].age != EOF) {
+        int count =  getListLength(arraylist);       // count : 현재 요소 개수
+        if(count % 10 > 8) {
+            arraylist->list = (student*)realloc(arraylist->list, arraylist->maxcount * sizeof(student));
+            printf("메모리 재할당 완료\n");
+        }
 
-//    해당 위치에 이미 데이터가 존재하면(고민해보기)
-    // if(strcmp(arraylist->list[p].name, "")) {
-    //     printf("에러 : 해당 위치에 기존 데이터가 있습니다\n");
-    //     return FALSE;
-    // }
+        // 기존에 있는 데이터 오른쪽으로 한 칸씩 shift 
+        for(int i = count; i > p; i--) {
+            strcpy(arraylist->list[i+1].name, arraylist->list[i].name);
+            arraylist->list[i+1].age = arraylist->list[i].age;
+            strcpy(arraylist->list[i+1].address, arraylist->list[i].address);
+        }
+        printf("데이터를 오른쪽으로 밀기\n");
+    }
 
-//    입력받은 데이터를 arraylist에 저장
+    // 입력받은 데이터를 arraylist에 저장
     strcpy(arraylist->list[p].name, student_data.name);
     arraylist->list[p].age = student_data.age;
     strcpy(arraylist->list[p].address, student_data.address);
     printf("list[%d]에 데이터 저장 완료\n", p);
-    // }
+
     arraylist->currentcount += 1;
     printf("현재 노드 개수 : %d\n", arraylist->currentcount);
 }
@@ -126,15 +153,30 @@ _Bool addElement(ArrayList* arraylist, const int p, student student_data) {
 // 리스트의 위치 p에 있는 원소를 제거
 _Bool removeElement(ArrayList *arraylist, const int p) {
 
-    if((arraylist->currentcount) <= p) {
-        printf("유효하지 않은 위치입니다\n");
+    // 만약 중간 index의 데이터를 삭제하는 경우
+    if(arraylist->list[p+1].age != EOF) {
+        int count =  getListLength(arraylist);       // count : 현재 요소 개수
+    
+        strncpy(arraylist->list[p].name, "", 1);
+        arraylist->list[p].age = -1;
+        strncpy(arraylist->list[p].address, "", 1);
+        arraylist->currentcount -= 1;
+        printf("list[%d]의 원소 제거 완료\n", p);
+
+        // 기존에 있는 데이터 왼쪽으로 한 칸씩 shift 
+        for(int i = p; i < count + 1; i++) {
+            strcpy(arraylist->list[i].name, arraylist->list[i+1].name);
+            arraylist->list[i].age = arraylist->list[i+1].age;
+            strcpy(arraylist->list[i].address, arraylist->list[i+1].address);
+        }
+        printf("데이터 왼쪽으로 한 칸씩 이동했음\n");
     }
     else {
         strncpy(arraylist->list[p].name, "", 1);
         arraylist->list[p].age = 0;
         strncpy(arraylist->list[p].address, "", 1);
         arraylist->currentcount -= 1;
-        printf("list[%d]의 원소 제거 완료\n", p);
+        printf("list[%d]의 원소 제거 완료\n", p-1);
     }
 }       
 
@@ -142,8 +184,12 @@ _Bool removeElement(ArrayList *arraylist, const int p) {
 // 리스트 초기화
 // 리스트의 모든 원소를 제거
 _Bool clearList(ArrayList *arraylist) {
-    for(int i = arraylist->currentcount - 1; i >= 0; i--)
-        removeElement(arraylist, i);
+    for(int i = arraylist->currentcount - 1; i >= 0; i--) {
+        strncpy(arraylist->list[i].name, "", 1);
+        arraylist->list[i].age = -1;
+        strncpy(arraylist->list[i].address, "", 1);
+    }
+    arraylist->currentcount = 0;
 }
 
 
